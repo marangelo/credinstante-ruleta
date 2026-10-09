@@ -1,5 +1,11 @@
 # Corre el build de ./dist con la imagen oficial de Node: no se construye ninguna imagen.
-# Flujo: npm run build:dist  ->  docker compose restart web
+# Flujo en el servidor:
+#   git pull
+#   docker-compose run --rm build     (genera dist/ dentro de un contenedor)
+#   docker-compose restart web
+# `version` es necesario para docker-compose v1; con `docker compose` (v2) se ignora.
+version: "3"
+
 services:
   web:
     image: node:22-alpine
@@ -24,3 +30,18 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  # Tarea puntual: instala dependencias y arma dist/. No arranca con `up`.
+  build:
+    image: node:22-alpine
+    profiles: ["build"]
+    working_dir: /src
+    command: ["sh", "-c", "npm ci && npm run build:dist"]
+    environment:
+      NEXT_TELEMETRY_DISABLED: 1
+    volumes:
+      - ./:/src
+      - npm-cache:/root/.npm
+
+volumes:
+  npm-cache:
