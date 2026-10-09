@@ -1,0 +1,26 @@
+# Corre el build de ./dist con la imagen oficial de Node: no se construye ninguna imagen.
+# Flujo: npm run build:dist  ->  docker compose restart web
+services:
+  web:
+    image: node:22-alpine
+    container_name: cn_credinstante-ruleta
+    working_dir: /app
+    command: ["node", "server.js"]
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      NEXT_TELEMETRY_DISABLED: 1
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dist:/app:ro
+    tmpfs:
+      - /app/.next/cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/login"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
