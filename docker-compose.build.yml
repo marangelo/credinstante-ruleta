@@ -1,0 +1,17 @@
+# Tarea puntual: instala dependencias y arma dist/ dentro de un contenedor (sin Node en el host).
+# Uso: docker-compose -f docker-compose.build.yml run --rm build
+version: "3"
+
+services:
+  build:
+    image: node:22-alpine
+    working_dir: /src
+    command: ["sh", "-c", "npm ci && npm run build:dist"]
+    environment:
+      NEXT_TELEMETRY_DISABLED: 1
+    volumes:
+      - ./:/src
+      - npm-cache:/root/.npm
+
+volumes:
+  npm-cache:
