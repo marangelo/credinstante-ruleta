@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Pantalla de premio ganado</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;family=Heebo:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFFFFF}a:hover{color:#FFE7A3}
+@keyframes fall{0%{transform:translateY(-60px) rotate(0)}100%{transform:translateY(900px) rotate(420deg)}}
+@keyframes spinrays{to{transform:rotate(360deg)}}
+.rays{animation:spinrays 28s linear infinite}
+.drop{animation:fall linear infinite}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; position: relative; font-family: 'Heebo', system-ui, sans-serif; color: #0A1F4A; background: #F7FBF4; display: flex; flex-direction: column; align-items: center; padding: 34px 20px 24px">
+  <div class="rays" style="position: absolute; left: 50%; top: 270px; width: 820px; height: 820px; margin: -410px 0 0 -410px; border-radius: 50%; background: repeating-conic-gradient(rgba(242,183,5,.18) 0deg 9deg, rgba(242,183,5,0) 9deg 22deg)"></div>
+  <sc-for list="{{drops}}" as="d" hint-placeholder-count="14">
+    <div class="drop" style="position: absolute; top: 0; left: {{d.x}}px; animation-duration: {{d.dur}}s; animation-delay: {{d.delay}}s">
+      <sc-if value="{{d.isCoin}}" hint-placeholder-val="{{ false }}">
+        <div style="width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFE7A3, #F2B705 60%, #B57D05); border: 2px solid #FFFFFF"></div>
+      </sc-if>
+      <sc-if value="{{d.isLeaf}}" hint-placeholder-val="{{ true }}">
+        <svg width="26" height="17" viewBox="0 0 34 22" aria-hidden="true"><path d="M2 11 C 8 0, 26 0, 32 11 C 26 22, 8 22, 2 11 Z" fill="{{d.fill}}"></path></svg>
+      </sc-if>
+    </div>
+  </sc-for>
+  <div style="position: absolute; left: -80px; right: -80px; bottom: -270px; height: 420px; border-radius: 50%; background: #2E8B47"></div>
+  <div style="position: absolute; left: -40px; right: -120px; bottom: -310px; height: 420px; border-radius: 50%; background: #1F6B35"></div>
+
+  <div style="position: relative; background: #FFFFFF; border-radius: 999px; padding: 7px 16px; font-size: 13px; font-weight: 700; color: #2E8B47; box-shadow: 0 4px 12px rgba(31,107,53,.15)">¡Felicitaciones, [NOMBRE]!</div>
+  <h1 style="position: relative; margin: 12px 0 0; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 48px; line-height: 1; color: #123E8C">¡Ganaste!</h1>
+  <div style="position: relative; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: #86B817; color: #2C3E50; border-radius: 999px; padding: 5px 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px">Seremos tus mejores aliados</div>
+
+  <div style="position: relative; margin-top: 30px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle at 35% 28%, #FFF6D6 0%, #F2B705 50%, #B57D05 100%); border: 6px solid #FFFFFF; box-shadow: 0 16px 40px rgba(181,125,5,.4); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #0A1F4A; box-sizing: border-box">
+    <div style="position: absolute; inset: 12px; border-radius: 50%; border: 2px dashed rgba(10,31,74,.3)"></div>
+    <div style="font-size: 13px; font-weight: 700; letter-spacing: 1.5px">BONO DE CRÉDITO</div>
+    <div style="font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 50px; line-height: 1.05">$10.000</div>
+    <div style="font-size: 12px; font-weight: 600">Para tu próximo crédito</div>
+  </div>
+
+  <div style="position: relative; margin-top: 28px; width: 100%; box-sizing: border-box; background: #FFFFFF; border-radius: 20px; padding: 16px 18px; box-shadow: 0 8px 24px rgba(31,107,53,.16); display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #3D5A3F">Código</span><span style="font-weight: 700; letter-spacing: 2px; color: #123E8C">[CODIGO]</span></div>
+    <div style="height: 1px; background: #E3EFE0"></div>
+    <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #3D5A3F">Válido hasta</span><span style="font-weight: 600">[FECHA]</span></div>
+    <div style="height: 1px; background: #E3EFE0"></div>
+    <div style="display: flex; align-items: center; gap: 8px; background: #CFEFC9; border-radius: 12px; padding: 10px 12px; font-size: 13px; font-weight: 600; color: #1F6B35">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F6B35" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>
+      Comprobante enviado por WhatsApp a [TELÉFONO]
+    </div>
+  </div>
+
+  <div style="flex-grow: 1"></div>
+  <button style="position: relative; width: 100%; height: 60px; border: none; border-radius: 20px; background: #F2B705; color: #0A1F4A; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 21px; box-shadow: 0 6px 0 #B57D05; cursor: pointer">Siguiente cliente</button>
+  <a href="#" style="position: relative; margin-top: 14px; font-size: 14px; font-weight: 600">Ver mis giros de hoy</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const fills = ['#2E8B47', '#7FC98B', '#1F6B35'];
+    const drops = Array.from({ length: 14 }, (_, i) => {
+      const isCoin = i % 3 === 0;
+      return { x: (i * 53 + 17) % 360, isCoin, isLeaf: !isCoin, fill: fills[i % 3], dur: 5 + (i % 5), delay: -((i * 0.9) % 6) };
+    });
+    return { drops };
+  }
+}
+</script>
+</body>
+</html>

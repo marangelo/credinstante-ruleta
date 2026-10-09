@@ -1,0 +1,196 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Arbol.dc.html": {
+      "h": 844,
+      "page": "exploraciones",
+      "radius": 36,
+      "title": "Idea 2 · Árbol que Crece",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "F1-Login.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "flujo",
+      "radius": 36,
+      "title": "1 · Login del promotor",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "F10-Voucher.dc.html": {
+      "h": 680,
+      "page": "flujo",
+      "radius": 8,
+      "title": "Voucher impreso (impresora térmica)",
+      "w": 320,
+      "x": 1410,
+      "y": 1264
+    },
+    "F2-Inicio.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "flujo",
+      "radius": 36,
+      "title": "2 · Inicio del promotor",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "F3-Cliente.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "flujo",
+      "radius": 36,
+      "title": "3 · Buscar cliente",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "F4-Ruleta.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "flujo",
+      "radius": 36,
+      "title": "4 · Ruleta (girá)",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "F5-Premio.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "flujo",
+      "radius": 36,
+      "title": "5 · ¡Ganaste!",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    },
+    "F6-Historial.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "flujo",
+      "radius": 36,
+      "title": "6 · Mis giros de hoy",
+      "w": 390,
+      "x": 0,
+      "y": 1264
+    },
+    "F7-YaParticipo.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "flujo",
+      "radius": 36,
+      "title": "Estado · Cliente ya participó",
+      "w": 390,
+      "x": 470,
+      "y": 1264
+    },
+    "F8-SinConexion.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "flujo",
+      "radius": 36,
+      "title": "Estado · Sin conexión",
+      "w": 390,
+      "x": 940,
+      "y": 1264
+    },
+    "Gala.dc.html": {
+      "h": 844,
+      "page": "exploraciones",
+      "radius": 36,
+      "title": "Idea 3 · Vitrina de Premios",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Ganaste.dc.html": {
+      "h": 844,
+      "page": "exploraciones",
+      "radius": 36,
+      "title": "Pantalla de premio · estilo Árbol",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "exploraciones",
+      "radius": 36,
+      "title": "Idea 1 · Día Soleado (girá la ruleta)",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-09T18:06:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "page": "flujo",
+    "view": "canvas"
+  },
+  "notes": {
+    "t_estados": {
+      "kind": "title1",
+      "maxW": 1730,
+      "page": "flujo",
+      "text": "Historial, estados especiales y voucher",
+      "w": 240,
+      "x": 0,
+      "y": 964
+    },
+    "t_flujo": {
+      "kind": "title1",
+      "maxW": 2270,
+      "page": "flujo",
+      "text": "App del promotor · flujo principal",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "titulo": {
+      "kind": "title1",
+      "maxW": 1800,
+      "page": "exploraciones",
+      "text": "Ruleta Credinstante · variaciones del estilo Árbol que Crece",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Arbol.dc.html",
+    "Gala.dc.html",
+    "Ganaste.dc.html",
+    "F1-Login.dc.html",
+    "F2-Inicio.dc.html",
+    "F3-Cliente.dc.html",
+    "F4-Ruleta.dc.html",
+    "F5-Premio.dc.html",
+    "F6-Historial.dc.html",
+    "F7-YaParticipo.dc.html",
+    "F8-SinConexion.dc.html",
+    "F10-Voucher.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "flujo",
+      "name": "Flujo de la app"
+    },
+    {
+      "id": "exploraciones",
+      "name": "Exploraciones"
+    }
+  ],
+  "title": "Ruleta de Premios Credinstante"
+}

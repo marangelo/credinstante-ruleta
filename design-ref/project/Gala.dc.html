@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ruleta Vitrina de Premios</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;family=Heebo:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F6B35}a:hover{color:#123E8C}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; position: relative; font-family: 'Heebo', system-ui, sans-serif; color: #0A1F4A; background: #F7FBF4; display: flex; flex-direction: column; align-items: center; padding: 22px 20px 24px">
+  <div style="position: absolute; left: -60px; right: -60px; top: -220px; height: 480px; border-radius: 0 0 50% 50%; background: #1F6B35"></div>
+  <div style="position: absolute; left: -100px; right: -20px; top: -250px; height: 470px; border-radius: 0 0 50% 50%; background: #2E8B47"></div>
+  <sc-for list="{{floaters}}" as="f" hint-placeholder-count="6">
+    <svg width="30" height="20" viewBox="0 0 34 22" style="position: absolute; left: {{f.x}}px; top: {{f.y}}px; transform: rotate({{f.r}}deg); opacity: .55" aria-hidden="true"><path d="M2 11 C 8 0, 26 0, 32 11 C 26 22, 8 22, 2 11 Z" fill="#CFEFC9"></path></svg>
+  </sc-for>
+
+  <div style="position: relative; display: flex; width: 100%; justify-content: space-between; align-items: center">
+    <div style="background: #FFFFFF; border-radius: 14px; padding: 4px 10px 4px 4px; display: flex; align-items: center; gap: 6px">
+      <img src="/_blob/00057d2c0108ccd86df8a17eb0c7b52b" alt="Credinstante" style="width: 40px; height: 40px; object-fit: contain">
+      <div style="font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px; color: #123E8C">Credinstante</div>
+    </div>
+    <div style="background: #FFF1BF; color: #0A1F4A; border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700">Cliente: [NOMBRE]</div>
+  </div>
+
+  <h1 style="position: relative; margin: 18px 0 0; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 30px; line-height: 1.05; text-align: center; color: #FFFFFF">Premios que hacen<br><span style="color: #FFE7A3">crecer tu bolsillo</span></h1>
+  <div style="position: relative; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: #86B817; color: #2C3E50; border-radius: 999px; padding: 5px 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px">Créditos instantáneos e inmediatos</div>
+
+  <div style="position: relative; width: 270px; height: 270px; margin-top: 20px; flex-shrink: 0">
+    <div style="position: absolute; inset: -10px; border-radius: 50%; background: #F7FBF4"></div>
+    <div style="position: absolute; inset: 0; border-radius: 50%; background: #FFFFFF; box-shadow: 0 16px 36px rgba(31,107,53,.3)"></div>
+    <div style="position: absolute; inset: 8px; border-radius: 50%; overflow: hidden; border: 4px solid #F2B705; transform: rotate(-22deg); background: {{conic}}">
+      <sc-for list="{{segments}}" as="s" hint-placeholder-count="8">
+        <div style="position: absolute; inset: 0; transform: rotate({{s.mid}}deg); display: flex; justify-content: center">
+          <div style="margin-top: 16px; width: 70px; text-align: center; color: {{s.ink}}">
+            <div style="font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 16px; line-height: 1">{{s.big}}</div>
+            <div style="font-size: 9px; font-weight: 600; line-height: 1.15; margin-top: 2px">{{s.small}}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="position: absolute; left: 50%; top: 50%; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; background: #FFFFFF; border: 4px solid #F2B705; box-shadow: 0 6px 14px rgba(0,0,0,.22); box-sizing: border-box; overflow: hidden">
+      <div style="position: absolute; left: 0; top: 0; width: 88px; height: 81px; overflow: hidden">
+        <img src="/_blob/00057d2c0108ccd86df8a17eb0c7b52b" alt="Logo Credinstante" style="position: absolute; left: -6px; top: 4px; width: 100px; height: 100px; max-width: none">
+      </div>
+    </div>
+    <div style="position: absolute; left: 50%; top: -18px; width: 40px; height: 40px; margin-left: -20px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFE7A3, #F2B705 60%, #B57D05); border: 3px solid #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,.25); display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; font-weight: 800; color: #FFFFFF; font-size: 18px">$</div>
+  </div>
+
+  <div style="position: relative; width: 100%; margin-top: 20px; display: flex; justify-content: space-between; align-items: baseline">
+    <div style="font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 18px; color: #123E8C">Lo que podés ganar</div>
+    <a href="#" style="font-size: 13px; font-weight: 600">Ver todos</a>
+  </div>
+  <div style="position: relative; width: 100%; margin-top: 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+    <sc-for list="{{prizes}}" as="p" hint-placeholder-count="4">
+      <div style="background: #FFFFFF; border-radius: 16px; padding: 12px; box-shadow: 0 4px 14px rgba(31,107,53,.12); display: flex; align-items: center; gap: 10px">
+        <div style="width: 40px; height: 40px; border-radius: 12px; background: {{p.bg}}; color: {{p.ink}}; display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 15px; flex-shrink: 0">{{p.icon}}</div>
+        <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
+          <div style="font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 15px; color: #123E8C">{{p.big}}</div>
+          <div style="font-size: 11px; color: #3D5A3F">{{p.small}}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="flex-grow: 1"></div>
+  <button style="position: relative; width: 100%; height: 60px; border: none; border-radius: 20px; background: #2E8B47; color: #FFFFFF; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 22px; box-shadow: 0 6px 0 #1F6B35; cursor: pointer">¡Girar ahora!</button>
+  <a href="#" style="position: relative; margin-top: 12px; font-size: 13px">Bases y condiciones</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const segs = [
+      { big: '$5.000', small: 'Bono', fill: '#2E8B47', ink: '#FFFFFF' },
+      { big: 'Cuota', small: 'Gratis', fill: '#FFFFFF', ink: '#123E8C' },
+      { big: '-10%', small: 'En tu tasa', fill: '#123E8C', ink: '#FFFFFF' },
+      { big: '¡Otra!', small: 'Girá de nuevo', fill: '#CFEFC9', ink: '#123E8C' },
+      { big: '$10.000', small: 'Bono', fill: '#2E8B47', ink: '#FFFFFF' },
+      { big: 'Kit', small: 'Credinstante', fill: '#FFFFFF', ink: '#123E8C' },
+      { big: 'x2', small: 'Doble chance', fill: '#123E8C', ink: '#FFFFFF' },
+      { big: 'GRAN', small: 'Premio', fill: '#F2B705', ink: '#0A1F4A' }
+    ];
+    const step = 360 / segs.length;
+    const stops = segs.map((s, i) => s.fill + ' ' + (i*step) + 'deg ' + ((i+1)*step) + 'deg').join(', ');
+    return {
+      conic: 'conic-gradient(' + stops + ')',
+      segments: segs.map((s, i) => ({ ...s, mid: i*step + step/2 })),
+      floaters: [
+        { x: 20, y: 120, r: -20 }, { x: 330, y: 90, r: 30 }, { x: 40, y: 230, r: 15 },
+        { x: 320, y: 200, r: -35 }, { x: 170, y: 72, r: 10 }, { x: 290, y: 150, r: 60 }
+      ],
+      prizes: [
+        { icon: '$', big: '$10.000', small: 'Bono de crédito', bg: '#2E8B47', ink: '#FFFFFF' },
+        { icon: '1', big: 'Cuota gratis', small: 'En tu préstamo', bg: '#FFF1BF', ink: '#0A1F4A' },
+        { icon: '%', big: '-10% tasa', small: 'Próximo crédito', bg: '#123E8C', ink: '#FFFFFF' },
+        { icon: '★', big: 'Gran premio', small: '[DESCRIBIR]', bg: '#F2B705', ink: '#0A1F4A' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

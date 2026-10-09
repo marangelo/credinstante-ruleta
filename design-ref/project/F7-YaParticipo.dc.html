@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cliente ya participó</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;family=Heebo:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFFFFF}a:hover{color:#FFE7A3}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; position: relative; font-family: 'Heebo', system-ui, sans-serif; color: #2C3E50; background: #F7FBF4; display: flex; flex-direction: column; align-items: center; padding: 24px 24px 24px">
+  <div style="position: absolute; left: -80px; right: -80px; bottom: -270px; height: 420px; border-radius: 50%; background: #2E8B47"></div>
+  <div style="position: absolute; left: -40px; right: -120px; bottom: -310px; height: 420px; border-radius: 50%; background: #1F6B35"></div>
+
+  <div style="position: relative; width: 100%; display: flex">
+    <a href="F3-Cliente.dc.html" aria-label="Volver" style="width: 44px; height: 44px; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(31,107,53,.12)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#123E8C" stroke-width="2.5" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+  </div>
+
+  <div style="position: relative; margin-top: 50px; width: 170px; height: 170px; border-radius: 50%; background: #FFF1BF; display: flex; align-items: center; justify-content: center">
+    <div style="width: 120px; height: 120px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 8px 20px rgba(181,125,5,.25); display: flex; align-items: center; justify-content: center">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#B57D05" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+    </div>
+  </div>
+
+  <h1 style="position: relative; margin: 28px 0 0; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 28px; line-height: 1.15; text-align: center; color: #123E8C">Este cliente ya<br>participó</h1>
+  <p style="position: relative; margin: 10px 0 0; font-size: 15px; line-height: 1.45; text-align: center; color: #3D5A3F">Cada cliente puede girar una sola vez por promoción. ¡Gracias por confiar en nosotros!</p>
+
+  <div style="position: relative; margin-top: 22px; width: 100%; box-sizing: border-box; background: #FFFFFF; border-radius: 20px; padding: 16px 18px; box-shadow: 0 8px 24px rgba(31,107,53,.14); display: flex; flex-direction: column; gap: 9px">
+    <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #3D5A3F">Cliente</span><span style="font-weight: 700; color: #123E8C">[NOMBRE DEL CLIENTE]</span></div>
+    <div style="height: 1px; background: #E3EFE0"></div>
+    <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #3D5A3F">Giró el</span><span style="font-weight: 600">[FECHA]</span></div>
+    <div style="height: 1px; background: #E3EFE0"></div>
+    <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #3D5A3F">Ganó</span><span style="font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 17px; color: #2E8B47">$[MONTO]</span></div>
+    <div style="height: 1px; background: #E3EFE0"></div>
+    <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #3D5A3F">Promotor</span><span style="font-weight: 600">[PROMOTOR]</span></div>
+  </div>
+
+  <div style="flex-grow: 1"></div>
+  <a href="F3-Cliente.dc.html" style="position: relative; width: 100%; height: 60px; border-radius: 20px; background: #F2B705; color: #0A1F4A; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 21px; box-shadow: 0 6px 0 #B57D05; display: flex; align-items: center; justify-content: center; text-decoration: none">Buscar otro cliente</a>
+  <a href="F10-Voucher.dc.html" style="position: relative; margin-top: 14px; font-size: 14px; font-weight: 600">Reimprimir voucher</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
