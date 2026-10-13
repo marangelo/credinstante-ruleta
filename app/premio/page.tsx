@@ -1,24 +1,28 @@
 import type { Metadata } from "next";
-import { Printer } from "lucide-react";
+import { Gift, Printer } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Hills } from "@/components/Hills";
 import { Pill } from "@/components/Pill";
 import { PremioDecor } from "@/components/premio-decor";
-import { leerMonto, type MontoSearchParams } from "@/components/premio-monto";
-import { formatMonto, premioEjemplo } from "@/lib/mock-data";
+import { redirect } from "next/navigation";
+import { formatMonto } from "@/lib/mock-data";
+import { fechaHora, giroPorCodigo } from "@/lib/ruleta";
 
 export const metadata: Metadata = { title: "¡Ganaste! · Credin$tante" };
 
-export default async function PremioPage({ searchParams }: { searchParams: MontoSearchParams }) {
-  const monto = await leerMonto(searchParams);
-  const { cliente, promotor, codigo, fechaHora } = premioEjemplo;
-  const nombre = cliente.nombre.split(" ")[0];
+export default async function PremioPage({ searchParams }: { searchParams: Promise<{ codigo?: string }> }) {
+  const giro = await giroPorCodigo(String((await searchParams).codigo ?? ""));
+  if (!giro) redirect("/inicio");
+
+  const { codigo } = giro;
+  const esObjeto = giro.tipo === "OBJETO";
+  const nombre = giro.cliente.split(" ")[0];
 
   const datos = [
     { label: "Código", value: codigo, className: "tracking-[2px] text-brand-blue font-bold" },
-    { label: "Entregado por", value: promotor.nombre, className: "font-semibold" },
-    { label: "Fecha y hora", value: fechaHora, className: "font-semibold" },
+    { label: "Entregado por", value: giro.promotor ?? "-", className: "font-semibold" },
+    { label: "Fecha y hora", value: fechaHora(giro.fecha), className: "font-semibold" },
   ];
 
   return (
@@ -45,8 +49,20 @@ export default async function PremioPage({ searchParams }: { searchParams: Monto
           }}
         >
           <div aria-hidden="true" className="absolute inset-3 rounded-full border-2 border-dashed border-navy/30" />
-          <p className="text-[13px] font-extrabold tracking-[1.5px]">PREMIO EN EFECTIVO</p>
-          <p className="font-display text-[64px] font-black leading-[1.05]">{formatMonto(monto)}</p>
+          {esObjeto ? (
+            <>
+              <Gift size={40} strokeWidth={2.2} aria-hidden="true" />
+              <p className="mt-1 text-[13px] font-extrabold tracking-[1.5px]">TU PREMIO</p>
+              <p className="line-clamp-2 max-w-[170px] text-center font-display text-[26px] font-black leading-[1.05] [overflow-wrap:anywhere]">
+                {giro.premio}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-[13px] font-extrabold tracking-[1.5px]">PREMIO EN EFECTIVO</p>
+              <p className="font-display text-[64px] font-black leading-[1.05]">{formatMonto(giro.monto ?? 0)}</p>
+            </>
+          )}
           <p className="text-[12px] font-bold">Credin$tante</p>
         </div>
 
@@ -70,7 +86,7 @@ export default async function PremioPage({ searchParams }: { searchParams: Monto
 
         <div className="min-h-5 flex-1" />
 
-        <Button href={`/voucher?monto=${monto}`} icon={<Printer size={22} strokeWidth={2.4} aria-hidden="true" />}>
+        <Button href={`/voucher?codigo=${codigo}`} icon={<Printer size={22} strokeWidth={2.4} aria-hidden="true" />}>
           Imprimir voucher
         </Button>
         <Button href="/cliente" variant="secondary" className="mt-3">

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { BackButton } from "@/components/BackButton";
-import { leerMonto, type MontoSearchParams } from "@/components/premio-monto";
+import { redirect } from "next/navigation";
 import { VoucherPrintButton } from "@/components/voucher-print-button";
-import { formatMonto, premioEjemplo, promocion, SOPORTE_TEL } from "@/lib/mock-data";
+import { formatMonto, SOPORTE_TEL } from "@/lib/mock-data";
+import { fechaHora, giroPorCodigo } from "@/lib/ruleta";
 
 export const metadata: Metadata = { title: "Voucher · Credin$tante" };
 
@@ -15,15 +16,18 @@ const printCss = `
 }
 `;
 
-export default async function VoucherPage({ searchParams }: { searchParams: MontoSearchParams }) {
-  const monto = await leerMonto(searchParams);
-  const { cliente, promotor, codigo, fechaHora } = premioEjemplo;
+export default async function VoucherPage({ searchParams }: { searchParams: Promise<{ codigo?: string }> }) {
+  const giro = await giroPorCodigo(String((await searchParams).codigo ?? ""));
+  if (!giro) redirect("/inicio");
+
+  const { codigo } = giro;
+  const esObjeto = giro.tipo === "OBJETO";
 
   const datos = [
-    { label: "Cliente", value: cliente.nombre },
-    { label: "Documento", value: cliente.documento },
-    { label: "Promotor", value: promotor.nombre },
-    { label: "Fecha y hora", value: fechaHora },
+    { label: "Cliente", value: giro.cliente },
+    { label: "Cédula", value: giro.cedula },
+    { label: "Promotor", value: giro.promotor ?? "-" },
+    { label: "Fecha y hora", value: fechaHora(giro.fecha) },
     { label: "Código", value: codigo, className: "tracking-[1px]" },
   ];
 
@@ -32,7 +36,7 @@ export default async function VoucherPage({ searchParams }: { searchParams: Mont
       <style>{printCss}</style>
 
       <div className="mb-4 flex w-[320px] max-w-full items-center justify-between print:hidden">
-        <BackButton href={`/premio?monto=${monto}`} />
+        <BackButton href={`/premio?codigo=${codigo}`} />
         <VoucherPrintButton />
       </div>
 
@@ -50,11 +54,15 @@ export default async function VoucherPage({ searchParams }: { searchParams: Mont
         <p className="text-[12px]">TEL {SOPORTE_TEL}</p>
         <hr className="w-full border-0 border-t-2 border-dashed border-black" />
         <h1 className="font-display text-[18px] font-black tracking-[2px]">VOUCHER DE PREMIO</h1>
-        <p className="text-[12px]">Ruleta · {promocion.nombre}</p>
+        <p className="text-[12px]">Ruleta · {giro.promocion}</p>
 
         <div className="mt-1 w-full rounded-lg border-2 border-black p-2.5 text-center">
-          <p className="text-[12px] font-bold tracking-[1px]">MONTO GANADO</p>
-          <p className="font-display text-[52px] font-black leading-[1.05]">{formatMonto(monto)}</p>
+          <p className="text-[12px] font-bold tracking-[1px]">{esObjeto ? "PREMIO GANADO" : "MONTO GANADO"}</p>
+          {esObjeto ? (
+            <p className="py-2 font-display text-[30px] font-black leading-[1.1] [overflow-wrap:anywhere]">{giro.premio}</p>
+          ) : (
+            <p className="font-display text-[52px] font-black leading-[1.05]">{formatMonto(giro.monto ?? 0)}</p>
+          )}
         </div>
 
         <dl className="flex w-full flex-col gap-1.5 text-[13px]">

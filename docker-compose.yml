@@ -3,6 +3,8 @@
 #   git pull
 #   docker-compose -f docker-compose.build.yml run --rm build   (genera dist/)
 #   docker-compose restart web
+# Variables secretas (conexión a Laravel, firma de sesión) en ./.env: copiar .env.example.
+# Si cambiás el .env, recreá el contenedor con `docker-compose up -d` (restart no las recarga).
 # Compatible con docker-compose v1 (formato 3.0) y con `docker compose` v2.
 version: "3"
 
@@ -12,6 +14,7 @@ services:
     container_name: cn_credinstante-ruleta
     working_dir: /app
     command: ["node", "server.js"]
+    env_file: .env
     environment:
       NODE_ENV: production
       PORT: 3000

@@ -1,12 +1,50 @@
 "use client";
 
 import Image from "next/image";
-import { formatMonto, GRAN_PREMIO, premiosRuleta } from "@/lib/mock-data";
+import { useMemo } from "react";
+import { Gift } from "lucide-react";
+import { formatMonto } from "@/lib/mock-data";
+import type { Premio } from "@/lib/premios";
 
-const SEGMENTOS = premiosRuleta.length;
-const PASO = 360 / SEGMENTOS;
+// Mínimo de rebanadas: con pocos premios se repiten para que la rueda no quede con 2 o 3 gajos enormes.
+const MIN_SEGMENTOS = 8;
 
-// Ciclo de colores de los segmentos; el gran premio va siempre en dorado.
+/** Rebanada de la rueda: el premio y su arco en grados (sentido horario desde arriba). */
+export type Segmento = { premio: Premio; inicio: number; fin: number };
+
+/**
+ * Rebanadas de la rueda a partir de los premios de la promoción. Todas miden lo mismo (rueda
+ * simétrica) aunque los premios tengan pesos distintos: el peso solo cambia la probabilidad del
+ * sorteo en Laravel, no el dibujo. Con pocos premios la lista se repite y se alternan bajos y altos.
+ */
+export function armarSegmentos(premios: Premio[]): Segmento[] {
+  if (premios.length === 0) return [];
+  // Dinero de menor a mayor y los objetos al final; luego se intercala bajo/alto
+  const orden = [...premios].sort((a, b) => (a.monto ?? Infinity) - (b.monto ?? Infinity));
+  const mezcla: Premio[] = [];
+  for (let i = 0, j = orden.length - 1; i <= j; i++, j--) {
+    mezcla.push(orden[i]);
+    if (i !== j) mezcla.push(orden[j]);
+  }
+
+  const vueltas = Math.ceil(MIN_SEGMENTOS / mezcla.length);
+  const lista = Array.from({ length: vueltas }, () => mezcla).flat();
+  const paso = 360 / lista.length;
+  return lista.map((premio, i) => ({ premio, inicio: i * paso, fin: (i + 1) * paso }));
+}
+
+/**
+ * Rotación final (siempre mayor que `actual`) que deja la rebanada bajo el indicador (arriba),
+ * después de `vueltas` vueltas completas. `desvio` (-1..1) corre el punto dentro de la rebanada.
+ */
+export function rotacionHacia(actual: number, seg: Segmento, vueltas: number, desvio = 0) {
+  const local = (seg.inicio + seg.fin) / 2 + desvio * ((seg.fin - seg.inicio) / 2) * 0.7;
+  const destino = ((-local % 360) + 360) % 360;
+  const resto = ((destino - (actual % 360)) % 360 + 360) % 360;
+  return actual + vueltas * 360 + resto;
+}
+
+// Ciclo de colores de los segmentos; el gran premio va en dorado y los objetos en lima.
 const paleta = [
   { fill: "#2E8B47", ink: "#FFFFFF" },
   { fill: "#FFF1BF", ink: "#123E8C" },
@@ -14,36 +52,18 @@ const paleta = [
   { fill: "#CFEFC9", ink: "#123E8C" },
 ];
 const dorado = { fill: "#F2B705", ink: "#0A1F4A" };
-
-const segmentos = premiosRuleta.map((monto, i) => {
-  const gran = monto === GRAN_PREMIO;
-  return { monto, gran, mid: i * PASO + PASO / 2, ...(gran ? dorado : paleta[i % paleta.length]) };
-});
-
-const conic = `conic-gradient(${segmentos
-  .map((s, i) => `${s.fill} ${i * PASO}deg ${(i + 1) * PASO}deg`)
-  .join(", ")})`;
+const objeto = { fill: "#86B817", ink: "#FFFFFF" };
 
 const hojas = Array.from({ length: 16 }, (_, i) => ({ deg: i * 22.5 + 11, fill: i % 2 ? "#2E8B47" : "#7FC98B" }));
 
-/** Índice del segmento que queda bajo el indicador (arriba) para una rotación dada en grados. */
-export function segmentoEn(rotation: number) {
-  const local = (((-rotation % 360) + 360) % 360);
-  return Math.floor(local / PASO) % SEGMENTOS;
-}
-
-/**
- * Rotación final (siempre mayor que `actual`) que deja el segmento `indice` bajo el indicador,
- * después de `vueltas` vueltas completas. `desvio` (-1..1) corre el punto dentro del segmento.
- */
-export function rotacionHacia(actual: number, indice: number, vueltas: number, desvio = 0) {
-  const local = indice * PASO + PASO / 2 + desvio * PASO * 0.35;
-  const destino = ((-local % 360) + 360) % 360;
-  const resto = ((destino - (actual % 360)) % 360 + 360) % 360;
-  return actual + vueltas * 360 + resto;
-}
+// Ancho de referencia de una rebanada (12 por rueda): con menos grados el texto se achica.
+const ANCHO_REFERENCIA = 30;
+// Por debajo de este ancho no entra texto: la rebanada queda solo con su color.
+const ANCHO_MINIMO_TEXTO = 9;
 
 type WheelProps = {
+  /** Rebanadas de la rueda (ver armarSegmentos). */
+  segmentos: Segmento[];
   /** Diámetro del aro blanco en px (las hojas sobresalen ~17px por lado). */
   size?: number;
   /** Rotación acumulada en grados (sentido horario). */
@@ -54,15 +74,36 @@ type WheelProps = {
   onSpinEnd?: () => void;
 };
 
-export function Wheel({ size = 340, rotation = 0, durationMs = 5000, onSpinEnd }: WheelProps) {
+export function Wheel({ segmentos, size = 340, rotation = 0, durationMs = 10000, onSpinEnd }: WheelProps) {
   const k = size / 340;
   const centro = 112 * k;
-  const lista = premiosRuleta.map(formatMonto).join(", ");
+
+  const { gajos, conic, lista } = useMemo(() => {
+    const montos = segmentos.flatMap((s) => (s.premio.tipo === "DINERO" ? [s.premio.monto ?? 0] : []));
+    const mayor = new Set(montos).size > 1 ? Math.max(...montos) : null;
+    const g = segmentos.map((s, i) => {
+      const esObjeto = s.premio.tipo === "OBJETO";
+      const gran = !esObjeto && s.premio.monto === mayor;
+      return {
+        ...s,
+        gran,
+        ancho: s.fin - s.inicio,
+        mid: (s.inicio + s.fin) / 2,
+        ...(esObjeto ? objeto : gran ? dorado : paleta[i % paleta.length]),
+      };
+    });
+    const unicos = new Map(segmentos.map((s) => [s.premio.id, s.premio]));
+    return {
+      gajos: g,
+      conic: `conic-gradient(${g.map((s) => `${s.fill} ${s.inicio}deg ${s.fin}deg`).join(", ")})`,
+      lista: [...unicos.values()].map((p) => (p.tipo === "OBJETO" ? p.nombre : formatMonto(p.monto ?? 0))).join(", "),
+    };
+  }, [segmentos]);
 
   return (
     <div
       role="img"
-      aria-label={`Ruleta de premios con ${SEGMENTOS} montos: ${lista}`}
+      aria-label={`Ruleta de premios: ${lista}`}
       className="relative shrink-0"
       style={{ width: size, height: size }}
     >
@@ -97,33 +138,52 @@ export function Wheel({ size = 340, rotation = 0, durationMs = 5000, onSpinEnd }
           inset: 10 * k,
           background: conic,
           transform: `rotate(${rotation}deg)`,
-          transition: `transform ${durationMs}ms cubic-bezier(.12,.72,.08,1)`,
+          // ease-out cúbica: arranca rápido y la velocidad baja de forma pareja hasta detenerse suave
+          transition: `transform ${durationMs}ms cubic-bezier(.22,.61,.36,1)`,
         }}
         onTransitionEnd={(e) => {
           if (e.target === e.currentTarget && e.propertyName === "transform") onSpinEnd?.();
         }}
       >
-        {segmentos.map((s) => (
-          <div
-            key={s.monto}
-            className="absolute inset-0 flex justify-center"
-            style={{ transform: `rotate(${s.mid}deg)` }}
-          >
+        {gajos.map((s, i) => {
+          if (s.ancho < ANCHO_MINIMO_TEXTO) return null;
+          const escala = Math.min(1, s.ancho / ANCHO_REFERENCIA);
+          return (
             <div
-              className="flex flex-col items-center text-center"
-              style={{ marginTop: 16 * k, width: 60 * k, color: s.ink }}
+              key={i}
+              className="absolute inset-0 flex justify-center"
+              style={{ transform: `rotate(${s.mid}deg)` }}
             >
-              <span className="font-display font-black leading-none" style={{ fontSize: 20 * k }}>
-                {formatMonto(s.monto)}
-              </span>
-              {s.gran && (
-                <span className="mt-0.5 font-bold tracking-[0.5px]" style={{ fontSize: 9 * k }}>
-                  GRAN PREMIO
-                </span>
-              )}
+              <div
+                className="flex flex-col items-center text-center"
+                style={{ marginTop: 16 * k, width: 64 * k * Math.max(escala, 0.7), color: s.ink }}
+              >
+                {s.premio.tipo === "OBJETO" ? (
+                  <>
+                    <Gift size={18 * k * escala} strokeWidth={2.4} />
+                    <span
+                      className="mt-0.5 line-clamp-2 font-display font-black leading-[1.05] [overflow-wrap:anywhere]"
+                      style={{ fontSize: 12 * k * escala }}
+                    >
+                      {s.premio.nombre}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-display font-black leading-none" style={{ fontSize: 20 * k * escala }}>
+                      {formatMonto(s.premio.monto ?? 0)}
+                    </span>
+                    {s.gran && (
+                      <span className="mt-0.5 font-bold tracking-[0.5px]" style={{ fontSize: 9 * k * escala }}>
+                        GRAN PREMIO
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Centro: árbol del logo, recortado para que no se vea el texto. */}

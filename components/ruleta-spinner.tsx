@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "./Button";
-import { rotacionHacia, segmentoEn, Wheel } from "./Wheel";
-import { formatMonto, premiosRuleta } from "@/lib/mock-data";
+import { armarSegmentos, rotacionHacia, Wheel } from "./Wheel";
+import { girar, type ResultadoGiro } from "@/app/ruleta/actions";
+import { textoPremio, type Premio, type PremioGanado } from "@/lib/premios";
 
-type Estado = "listo" | "girando" | "terminado";
+type Estado = "listo" | "pidiendo" | "girando" | "terminado";
+
+// Giro largo que va frenando de a poco (la curva está en Wheel). Con movimiento reducido, giro corto.
+const DURACION_GIRO = 10000;
+const VUELTAS_GIRO = 10;
 
 // En el mockup la rueda mide 340px en una pantalla de 390px: se mantiene esa proporción.
 const PROPORCION = 340 / 390;
@@ -38,64 +43,89 @@ function useWheelSize() {
   return { ref, size };
 }
 
-// Solo demo: el resultado se sortea en el cliente.
-export function RuletaSpinner() {
+type Props = { idCliente: number; premios: Premio[] };
+
+// El premio lo sortea y registra Laravel (acción `girar`); la rueda solo se anima hasta una
+// rebanada de ese premio. Las rebanadas son todas iguales; la probabilidad de cada premio la
+// define su peso en Laravel.
+export function RuletaSpinner({ idCliente, premios }: Props) {
+  const segmentos = useMemo(() => armarSegmentos(premios), [premios]);
   const [rotation, setRotation] = useState(0);
-  const [duracion, setDuracion] = useState(5000);
+  const [duracion, setDuracion] = useState(DURACION_GIRO);
   const [estado, setEstado] = useState<Estado>("listo");
-  const [monto, setMonto] = useState<number | null>(null);
+  const [premio, setPremio] = useState<{ premio: PremioGanado; codigo: string } | null>(null);
+  const [error, setError] = useState<{ mensaje: string; codigo?: string } | null>(null);
   const { ref, size } = useWheelSize();
 
-  function girar() {
+  async function iniciarGiro() {
     if (estado !== "listo") return;
+    setEstado("pidiendo");
+    setError(null);
+
+    let r: ResultadoGiro;
+    try {
+      r = await girar(idCliente);
+    } catch {
+      r = { ok: false, error: "No pudimos conectar con el servidor. Revisá tu conexión e intentá de nuevo." };
+    }
+
+    if (!r.ok) {
+      setError({ mensaje: r.error, codigo: r.codigo });
+      setEstado(r.codigo ? "terminado" : "listo");
+      return;
+    }
+
+    // Cualquiera de las rebanadas del premio ganado
+    const opciones = segmentos.filter((s) => s.premio.id === r.idPremio);
+    const destino = opciones[Math.floor(Math.random() * opciones.length)] ?? segmentos[0];
     const reducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const indice = Math.floor(Math.random() * premiosRuleta.length);
-    setDuracion(reducido ? 1200 : 5000);
-    setRotation((r) => rotacionHacia(r, indice, reducido ? 1 : 6, Math.random() * 2 - 1));
+    setPremio({ premio: r.premio, codigo: r.codigo });
+    setDuracion(reducido ? 1200 : DURACION_GIRO);
+    setRotation((rot) => rotacionHacia(rot, destino, reducido ? 1 : VUELTAS_GIRO, Math.random() * 2 - 1));
     setEstado("girando");
   }
 
   function alTerminar() {
-    if (estado !== "girando") return;
-    setMonto(premiosRuleta[segmentoEn(rotation)]);
-    setEstado("terminado");
+    if (estado === "girando") setEstado("terminado");
   }
 
   // Respaldo: si el navegador no dispara transitionend (pestaña en segundo plano,
   // transición interrumpida), el resultado igual aparece al terminar el tiempo del giro.
   useEffect(() => {
     if (estado !== "girando") return;
-    const t = window.setTimeout(() => {
-      setMonto(premiosRuleta[segmentoEn(rotation)]);
-      setEstado("terminado");
-    }, duracion + 200);
+    const t = window.setTimeout(() => setEstado("terminado"), duracion + 200);
     return () => window.clearTimeout(t);
-  }, [estado, rotation, duracion]);
+  }, [estado, duracion]);
 
   return (
     <>
       {/* Área flexible: la rueda toma el tamaño que permite la pantalla. */}
       <div ref={ref} className="flex min-h-0 flex-1 items-start justify-center pt-[26px]">
-        <Wheel size={size} rotation={rotation} durationMs={duracion} onSpinEnd={alTerminar} />
+        <Wheel segmentos={segmentos} size={size} rotation={rotation} durationMs={duracion} onSpinEnd={alTerminar} />
       </div>
 
       {/* Alto reservado para la pill del resultado, así la rueda no cambia de tamaño al aparecer. */}
-      <div aria-live="polite" className="flex h-[58px] shrink-0 items-start justify-center">
-        {estado === "terminado" && monto !== null && (
+      <div aria-live="polite" className="flex min-h-[58px] shrink-0 items-start justify-center">
+        {estado === "terminado" && premio && (
           <p className="pop-in flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-[18px] font-black text-brand-blue shadow-[0_4px_12px_rgba(0,0,0,0.18)]">
             <Check size={18} strokeWidth={3} className="text-green" aria-hidden="true" />
-            ¡Ganó {formatMonto(monto)}!
+            ¡Ganó {textoPremio(premio.premio)}!
+          </p>
+        )}
+        {error && (
+          <p role="alert" className="mb-2 rounded-2xl bg-cream px-4 py-2.5 text-center text-[14px] font-semibold text-navy">
+            {error.mensaje}
           </p>
         )}
       </div>
 
-      {estado === "terminado" && monto !== null ? (
-        <Button key="ver" href={`/premio?monto=${monto}`} className="swap-in [animation-delay:120ms]!">
-          Ver premio
+      {estado === "terminado" && (premio || error?.codigo) ? (
+        <Button key="ver" href={`/premio?codigo=${premio?.codigo ?? error!.codigo}`} className="swap-in [animation-delay:120ms]!">
+          {premio ? "Ver premio" : "Ver su premio"}
         </Button>
       ) : (
-        <Button key="girar" onClick={girar} disabled={estado === "girando"}>
-          {estado === "girando" ? "Girando…" : "¡Girar ahora!"}
+        <Button key="girar" onClick={iniciarGiro} disabled={estado !== "listo"}>
+          {estado === "listo" ? (error ? "Intentar de nuevo" : "¡Girar ahora!") : "Girando…"}
         </Button>
       )}
     </>
