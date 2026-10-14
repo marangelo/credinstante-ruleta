@@ -100,6 +100,8 @@
 .pop-in { animation: pop var(--dur-pop) var(--ease-spring) both; }
 /* Cambio de estado de un control (p.ej. "Girar" -> "Ver premio"). */
 .swap-in { animation: enter 280ms var(--ease-out-soft) both; }
+/* Aparición suave (p.ej. el oscurecido que destaca la rebanada ganadora). */
+.pop-fade { animation: route-fade 450ms var(--ease-out-soft) both; }
 /* El voucher "sale" de la impresora. */
 .ticket-in { animation: ticket 700ms var(--ease-out-soft) both; }
 

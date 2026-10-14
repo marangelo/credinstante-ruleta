@@ -9,6 +9,9 @@ import { redirect } from "next/navigation";
 import { formatMonto } from "@/lib/mock-data";
 import { fechaHora, giroPorCodigo } from "@/lib/ruleta";
 
+// La moneda mide 196px: los montos largos (C$1,000) bajan de tamaño para no salirse
+const tamanoMonto = (texto: string) => (texto.length <= 5 ? 56 : texto.length === 6 ? 46 : 38);
+
 export const metadata: Metadata = { title: "¡Ganaste! · Credin$tante" };
 
 export default async function PremioPage({ searchParams }: { searchParams: Promise<{ codigo?: string }> }) {
@@ -18,9 +21,13 @@ export default async function PremioPage({ searchParams }: { searchParams: Promi
   const { codigo } = giro;
   const esObjeto = giro.tipo === "OBJETO";
   const nombre = giro.cliente.split(" ")[0];
+  const monto = formatMonto(giro.monto ?? 0);
 
   const datos = [
-    { label: "Código", value: codigo, className: "tracking-[2px] text-brand-blue font-bold" },
+    { label: "Código", value: codigo, className: "tracking-[2px] text-brand-blue font-bold tabular-nums" },
+    // Los datos con los que el promotor identificó al cliente para girar
+    { label: "Cédula", value: giro.cedula, className: "font-semibold" },
+    ...(giro.credito ? [{ label: "N° de crédito", value: String(giro.credito), className: "font-semibold tabular-nums" }] : []),
     { label: "Entregado por", value: giro.promotor ?? "-", className: "font-semibold" },
     { label: "Fecha y hora", value: fechaHora(giro.fecha), className: "font-semibold" },
   ];
@@ -41,7 +48,7 @@ export default async function PremioPage({ searchParams }: { searchParams: Promi
         </Pill>
 
         <div
-          className="pop-in relative mt-6 flex size-[220px] shrink-0 flex-col items-center justify-center rounded-full border-6 border-white text-navy shadow-[0_16px_40px_rgba(181,125,5,0.4)]"
+          className="pop-in relative mt-5 flex size-[196px] shrink-0 flex-col items-center justify-center rounded-full border-6 border-white text-navy shadow-[0_16px_40px_rgba(181,125,5,0.4)]"
           style={{
             background: "radial-gradient(circle at 35% 28%, #FFF6D6 0%, #F2B705 50%, #B57D05 100%)",
             // La moneda llega después del título: es el momento principal de la pantalla.
@@ -60,7 +67,9 @@ export default async function PremioPage({ searchParams }: { searchParams: Promi
           ) : (
             <>
               <p className="text-[13px] font-extrabold tracking-[1.5px]">PREMIO EN EFECTIVO</p>
-              <p className="font-display text-[64px] font-black leading-[1.05]">{formatMonto(giro.monto ?? 0)}</p>
+              <p className="font-display font-black leading-[1.05]" style={{ fontSize: tamanoMonto(monto) }}>
+                {monto}
+              </p>
             </>
           )}
           <p className="text-[12px] font-bold">Credin$tante</p>

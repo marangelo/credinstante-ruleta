@@ -12,9 +12,16 @@ import { prepararRuleta } from "@/lib/ruleta";
 
 export const metadata: Metadata = { title: "Ruleta · Credin$tante" };
 
-export default async function RuletaPage({ searchParams }: { searchParams: Promise<{ cliente?: string }> }) {
-  const id = Number((await searchParams).cliente);
-  if (!Number.isInteger(id) || id <= 0) redirect("/cliente");
+export default async function RuletaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cliente?: string; credito?: string }>;
+}) {
+  const sp = await searchParams;
+  const id = Number(sp.cliente);
+  const idCredito = Number(sp.credito);
+  // Sin crédito no se puede girar: se vuelve a la búsqueda (cédula + crédito)
+  if (!Number.isInteger(id) || id <= 0 || !Number.isInteger(idCredito) || idCredito <= 0) redirect("/cliente");
 
   const datos = await prepararRuleta(id);
   if (!datos) redirect("/cliente");
@@ -66,7 +73,7 @@ export default async function RuletaPage({ searchParams }: { searchParams: Promi
             </Pill>
           </div>
 
-          <RuletaSpinner idCliente={cliente.id} premios={promocion.premios} />
+          <RuletaSpinner idCliente={cliente.id} idCredito={idCredito} premios={promocion.premios} />
         </>
       )}
     </Screen>

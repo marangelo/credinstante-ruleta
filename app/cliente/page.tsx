@@ -12,7 +12,7 @@ export default function ClientePage() {
       </header>
 
       <h1 className="mt-6 font-display text-[28px] font-black leading-[1.1] text-brand-blue">¿Quién gira hoy?</h1>
-      <p className="mt-1.5 text-[15px] text-ink-soft">Buscá al cliente con su número de cédula</p>
+      <p className="mt-1.5 text-[15px] text-ink-soft">Ingresá la cédula del cliente y el número de su crédito activo</p>
 
       <BuscarCliente />
     </Screen>

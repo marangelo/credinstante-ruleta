@@ -13,6 +13,7 @@ export type GiroDetalle = PremioGanado & {
   fecha: string; // "YYYY-MM-DD HH:mm:ss"
   cliente: string;
   cedula: string;
+  credito: number | null; // crédito con el que se giró (null en giros anteriores a guardarlo)
   promotor: string | null;
   promocion: string;
 };
@@ -39,7 +40,8 @@ export async function prepararRuleta(idCliente: number): Promise<Preparacion | n
 
 /** Giro registrado, por su código. null si no existe. */
 export async function giroPorCodigo(codigo: string): Promise<GiroDetalle | null> {
-  if (!/^RP-[0-9A-F]{6}$/i.test(codigo)) return null;
+  // Código numérico de 8 dígitos; los primeros giros usaban RP-XXXXXX y se siguen pudiendo abrir
+  if (!/^(\d{8}|RP-[0-9A-F]{6})$/i.test(codigo)) return null;
   const res = await laravelPost("/ruleta/giro", { codigo });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Laravel respondió ${res.status} en /ruleta/giro`);
@@ -50,6 +52,7 @@ export async function giroPorCodigo(codigo: string): Promise<GiroDetalle | null>
     fecha: g.FECHA,
     cliente: g.CLIENTE,
     cedula: g.CEDULA,
+    credito: g.CREDITO ?? null,
     promotor: g.PROMOTOR,
     promocion: g.PROMOCION,
   };
@@ -60,7 +63,7 @@ export type Periodo = "hoy" | "semana" | "mes";
 export type MisGiros = {
   /** entregado y mayor solo cuentan dinero; objetos es la cantidad de objetos entregados */
   resumen: { giros: number; entregado: number; mayor: number; objetos: number };
-  giros: (PremioGanado & { codigo: string; fecha: string; cliente: string })[];
+  giros: (PremioGanado & { codigo: string; fecha: string; cliente: string; zona: string | null })[];
   promocion: { nombre: string; vence: string; montos: number[]; objetos: string[] } | null;
 };
 
@@ -72,11 +75,12 @@ export async function misGiros(idUsuario: number, periodo: Periodo): Promise<Mis
   const p = r.PROMOCION;
   return {
     resumen: { giros: r.RESUMEN.GIROS, entregado: r.RESUMEN.ENTREGADO, mayor: r.RESUMEN.MAYOR, objetos: r.RESUMEN.OBJETOS },
-    giros: r.GIROS.map((g: PremioLaravel & { CODIGO: string; FECHA: string; CLIENTE: string }) => ({
+    giros: r.GIROS.map((g: PremioLaravel & { CODIGO: string; FECHA: string; CLIENTE: string; ZONA?: string | null }) => ({
       ...premioGanado(g),
       codigo: g.CODIGO,
       fecha: g.FECHA,
       cliente: g.CLIENTE,
+      zona: g.ZONA ?? null,
     })),
     promocion: p
       ? {

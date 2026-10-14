@@ -9,12 +9,12 @@ export type Premio = { id: number; tipo: TipoPremio; monto: number | null; nombr
 /** Premio que salió en un giro. `premio` es el nombre del objeto. */
 export type PremioGanado = { tipo: TipoPremio; monto: number | null; premio: string | null };
 
-/** "$300" o "Gorra" */
+/** "C$300" o "Gorra" */
 export function textoPremio(p: PremioGanado) {
   return p.tipo === "OBJETO" ? (p.premio ?? "Premio") : formatMonto(p.monto ?? 0);
 }
 
-/** "Premios de $100 a $500 y Gorra", según lo que tenga la promoción */
+/** "Premios de C$100 a C$500 y Gorra", según lo que tenga la promoción */
 export function resumenPremios(montos: number[], objetos: string[]) {
   const dinero =
     montos.length > 1

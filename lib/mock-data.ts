@@ -31,8 +31,8 @@ export const participacionPrevia = {
   promotor: promotor.nombre,
 };
 
-// Formato de Nicaragua: separador de miles con coma ($1,100)
-export const formatMonto = (n: number) => `$${n.toLocaleString("es-NI")}`;
+// Córdobas, con separador de miles con coma (C$1,100)
+export const formatMonto = (n: number) => `C$${n.toLocaleString("es-NI")}`;
 
 export const iniciales = (nombre: string) =>
   nombre

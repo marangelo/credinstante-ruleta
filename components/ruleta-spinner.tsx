@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { Button } from "./Button";
 import { armarSegmentos, rotacionHacia, Wheel } from "./Wheel";
@@ -13,12 +14,15 @@ type Estado = "listo" | "pidiendo" | "girando" | "terminado";
 const DURACION_GIRO = 10000;
 const VUELTAS_GIRO = 10;
 
-// En el mockup la rueda mide 340px en una pantalla de 390px: se mantiene esa proporción.
-const PROPORCION = 340 / 390;
-// Las hojas sobresalen del aro: el conjunto ocupa ~1.16 veces el diámetro.
-const ALTO_CON_HOJAS = 396 / 340;
+// La rueda ocupa casi todo el ancho de la pantalla (las hojitas van sobre el aro, no sobresalen).
+const MARGEN_LATERAL = 6;
+const MAX_SIZE = 420;
+// La flecha asoma ~28px por arriba: el conjunto mide ~1.08 veces el diámetro de alto.
+const ALTO_CON_FLECHA = 368 / 340;
 const MIN_SIZE = 240;
-const PADDING_SUPERIOR = 26;
+const PADDING_SUPERIOR = 40; // la flecha asoma 28px: deja aire con la pill de arriba
+// Tiempo para ver la rebanada ganadora antes de pasar solo a la pantalla del premio.
+const PAUSA_ANTES_DEL_PREMIO = 1600;
 
 /** Diámetro de la rueda según el ancho de la pantalla y el alto disponible. */
 function useWheelSize() {
@@ -30,8 +34,8 @@ function useWheelSize() {
     if (!el) return;
     const medir = () => {
       const pantalla = el.closest("main")?.clientWidth ?? 390;
-      const porAncho = pantalla * PROPORCION;
-      const porAlto = (el.clientHeight - PADDING_SUPERIOR) / ALTO_CON_HOJAS;
+      const porAncho = Math.min(MAX_SIZE, pantalla - MARGEN_LATERAL * 2);
+      const porAlto = (el.clientHeight - PADDING_SUPERIOR) / ALTO_CON_FLECHA;
       setSize(Math.round(Math.max(MIN_SIZE, Math.min(porAncho, porAlto))));
     };
     medir();
@@ -43,17 +47,18 @@ function useWheelSize() {
   return { ref, size };
 }
 
-type Props = { idCliente: number; premios: Premio[] };
+type Props = { idCliente: number; idCredito: number; premios: Premio[] };
 
 // El premio lo sortea y registra Laravel (acción `girar`); la rueda solo se anima hasta una
 // rebanada de ese premio. Las rebanadas son todas iguales; la probabilidad de cada premio la
 // define su peso en Laravel.
-export function RuletaSpinner({ idCliente, premios }: Props) {
+export function RuletaSpinner({ idCliente, idCredito, premios }: Props) {
   const segmentos = useMemo(() => armarSegmentos(premios), [premios]);
   const [rotation, setRotation] = useState(0);
   const [duracion, setDuracion] = useState(DURACION_GIRO);
   const [estado, setEstado] = useState<Estado>("listo");
   const [premio, setPremio] = useState<{ premio: PremioGanado; codigo: string } | null>(null);
+  const [ganador, setGanador] = useState<number | null>(null); // rebanada donde frena la rueda
   const [error, setError] = useState<{ mensaje: string; codigo?: string } | null>(null);
   const { ref, size } = useWheelSize();
 
@@ -64,7 +69,7 @@ export function RuletaSpinner({ idCliente, premios }: Props) {
 
     let r: ResultadoGiro;
     try {
-      r = await girar(idCliente);
+      r = await girar(idCliente, idCredito);
     } catch {
       r = { ok: false, error: "No pudimos conectar con el servidor. Revisá tu conexión e intentá de nuevo." };
     }
@@ -80,6 +85,7 @@ export function RuletaSpinner({ idCliente, premios }: Props) {
     const destino = opciones[Math.floor(Math.random() * opciones.length)] ?? segmentos[0];
     const reducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setPremio({ premio: r.premio, codigo: r.codigo });
+    setGanador(segmentos.indexOf(destino));
     setDuracion(reducido ? 1200 : DURACION_GIRO);
     setRotation((rot) => rotacionHacia(rot, destino, reducido ? 1 : VUELTAS_GIRO, Math.random() * 2 - 1));
     setEstado("girando");
@@ -88,6 +94,17 @@ export function RuletaSpinner({ idCliente, premios }: Props) {
   function alTerminar() {
     if (estado === "girando") setEstado("terminado");
   }
+
+  // Cuando cae el premio: se deja ver la rebanada ganadora un momento y se pasa sola a /premio.
+  // El botón "Ver premio" queda igual por si la navegación tarda.
+  const router = useRouter();
+  const urlPremio = premio ? `/premio?codigo=${premio.codigo}` : null;
+  useEffect(() => {
+    if (estado !== "terminado" || !urlPremio) return;
+    router.prefetch(urlPremio);
+    const t = window.setTimeout(() => router.push(urlPremio), PAUSA_ANTES_DEL_PREMIO);
+    return () => window.clearTimeout(t);
+  }, [estado, urlPremio, router]);
 
   // Respaldo: si el navegador no dispara transitionend (pestaña en segundo plano,
   // transición interrumpida), el resultado igual aparece al terminar el tiempo del giro.
@@ -100,8 +117,15 @@ export function RuletaSpinner({ idCliente, premios }: Props) {
   return (
     <>
       {/* Área flexible: la rueda toma el tamaño que permite la pantalla. */}
-      <div ref={ref} className="flex min-h-0 flex-1 items-start justify-center pt-[26px]">
-        <Wheel segmentos={segmentos} size={size} rotation={rotation} durationMs={duracion} onSpinEnd={alTerminar} />
+      <div ref={ref} className="flex min-h-0 flex-1 -mx-5 items-center justify-center pt-[40px]">
+        <Wheel
+          segmentos={segmentos}
+          size={size}
+          rotation={rotation}
+          durationMs={duracion}
+          onSpinEnd={alTerminar}
+          ganador={estado === "terminado" && premio ? ganador : null}
+        />
       </div>
 
       {/* Alto reservado para la pill del resultado, así la rueda no cambia de tamaño al aparecer. */}

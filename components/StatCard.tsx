@@ -4,7 +4,7 @@ export function StatCard({ label, value, accent = "blue" }: { label: string; val
   return (
     <Card className="p-4">
       <p className="text-[13px] text-ink-soft">{label}</p>
-      <p className={`font-display text-[28px] font-black leading-tight ${accent === "green" ? "text-green" : "text-brand-blue"}`}>
+      <p className={`font-display font-black leading-tight ${value.length > 7 ? "text-[23px]" : "text-[28px]"} ${accent === "green" ? "text-green" : "text-brand-blue"}`}>
         {value}
       </p>
     </Card>

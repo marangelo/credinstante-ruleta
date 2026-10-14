@@ -12,12 +12,13 @@ export type ResultadoGiro =
   | { ok: false; error: string; codigo?: string };
 
 // El premio lo sortea y guarda Laravel; la app solo anima la rueda hasta ese premio.
-export async function girar(idCliente: number): Promise<ResultadoGiro> {
+// idCredito: el crédito activo con el que se identificó al cliente; Laravel lo valida y lo guarda.
+export async function girar(idCliente: number, idCredito: number): Promise<ResultadoGiro> {
   const sesion = await getSesion();
 
   let res: Response;
   try {
-    res = await laravelPost("/ruleta/girar", { id_usuario: sesion.id, id_clientes: idCliente });
+    res = await laravelPost("/ruleta/girar", { id_usuario: sesion.id, id_clientes: idCliente, id_creditos: idCredito });
   } catch {
     return { ok: false, error: SIN_CONEXION };
   }

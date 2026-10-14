@@ -10,7 +10,7 @@ import { StatCard } from "@/components/StatCard";
 import { getSesion } from "@/lib/auth";
 import { formatMonto } from "@/lib/mock-data";
 import { resumenPremios, textoPremio } from "@/lib/premios";
-import { fechaLarga, hora, misGiros } from "@/lib/ruleta";
+import { diaHora, fechaLarga, misGiros } from "@/lib/ruleta";
 import { logout } from "../login/actions";
 
 export default async function InicioPage() {
@@ -118,13 +118,18 @@ export default async function InicioPage() {
                     aria-hidden="true"
                     className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-green-light font-display text-[15px] font-black text-green-dark"
                   >
-                    {g.tipo === "OBJETO" ? <Gift size={18} strokeWidth={2.4} /> : "$"}
+                    {g.tipo === "OBJETO" ? <Gift size={18} strokeWidth={2.4} /> : <span className="text-[13px]">C$</span>}
                   </span>
                   <div className="flex min-w-0 grow flex-col">
-                    <span className="truncate text-[15px] font-semibold text-ink">{g.cliente}</span>
-                    <span className="text-[12px] text-ink-soft">{hora(g.fecha)}</span>
+                    <span className="text-[15px] font-semibold leading-tight text-ink [overflow-wrap:anywhere]">{g.cliente}</span>
+                    <span className="mt-0.5 text-[12px] text-ink-soft">{diaHora(g.fecha)}</span>
+                    {g.zona && <span className="text-[12px] leading-tight text-ink-soft">{g.zona}</span>}
                   </div>
-                  <span className="max-w-[40%] truncate font-display text-[18px] font-black text-green-dark">{textoPremio(g)}</span>
+                  <span
+                    className={`max-w-[38%] shrink-0 text-right font-display font-black leading-tight text-green-dark [overflow-wrap:anywhere] ${g.tipo === "OBJETO" ? "text-[15px]" : "text-[18px]"}`}
+                  >
+                    {textoPremio(g)}
+                  </span>
                 </Link>
               </li>
             ))}

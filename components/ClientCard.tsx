@@ -1,5 +1,5 @@
 import { Check, X } from "lucide-react";
-import type { ClienteRuleta, Participacion } from "@/app/cliente/actions";
+import type { ClienteRuleta, CreditoActivo, Participacion } from "@/app/cliente/actions";
 import { textoPremio } from "@/lib/premios";
 import { Avatar } from "./Avatar";
 import { Card } from "./Card";
@@ -10,9 +10,17 @@ const fechaCorta = (f: string) => {
   return `${dd}/${m}/${y} · ${h.slice(0, 5)}`;
 };
 
-type Props = { cliente: ClienteRuleta; promocion: string | null; participacion: Participacion | null };
+// estado_credito de Credinstantes (4 = Inactivo nunca llega: no es un crédito activo)
+const ESTADO_CREDITO: Record<number, string> = { 1: "Al día", 2: "En mora", 3: "Vencido" };
 
-export function ClientCard({ cliente, promocion, participacion }: Props) {
+type Props = {
+  cliente: ClienteRuleta;
+  credito: CreditoActivo | null;
+  promocion: string | null;
+  participacion: Participacion | null;
+};
+
+export function ClientCard({ cliente, credito, promocion, participacion }: Props) {
   const checks = [
     cliente.activo
       ? { ok: true, text: "Cliente activo de Credin$tante" }
@@ -38,6 +46,12 @@ export function ClientCard({ cliente, promocion, participacion }: Props) {
           <p className="text-[14px] text-ink-soft">Céd. {cliente.cedula}</p>
           {cliente.telefono && <p className="text-[14px] text-ink-soft">Tel. {cliente.telefono}</p>}
           {cliente.zona && <p className="text-[14px] text-ink-soft">{cliente.zona}</p>}
+          {credito && (
+            <p className="text-[14px] text-ink-soft">
+              Crédito <span className="font-bold tabular-nums text-ink">N° {credito.id}</span>
+              {ESTADO_CREDITO[credito.estado] && ` · ${ESTADO_CREDITO[credito.estado]}`}
+            </p>
+          )}
         </div>
       </div>
       <ul className="mt-4 flex flex-col gap-2.5 border-t border-line pt-4">

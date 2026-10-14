@@ -3,10 +3,12 @@ import Image from "next/image";
 import { BackButton } from "@/components/BackButton";
 import { redirect } from "next/navigation";
 import { VoucherPrintButton } from "@/components/voucher-print-button";
-import { formatMonto, SOPORTE_TEL } from "@/lib/mock-data";
+import { EMPRESA } from "@/lib/empresa";
+import { formatMonto } from "@/lib/mock-data";
+import { montoEnLetras } from "@/lib/numero-a-letras";
 import { fechaHora, giroPorCodigo } from "@/lib/ruleta";
 
-export const metadata: Metadata = { title: "Voucher · Credin$tante" };
+export const metadata: Metadata = { title: "Ticket de premio · Credin$tante" };
 
 // Ticket para impresora térmica de 80mm: solo blanco y negro.
 const printCss = `
@@ -26,6 +28,7 @@ export default async function VoucherPage({ searchParams }: { searchParams: Prom
   const datos = [
     { label: "Cliente", value: giro.cliente },
     { label: "Cédula", value: giro.cedula },
+    ...(giro.credito ? [{ label: "N° de crédito", value: String(giro.credito) }] : []),
     { label: "Promotor", value: giro.promotor ?? "-" },
     { label: "Fecha y hora", value: fechaHora(giro.fecha) },
     { label: "Código", value: codigo, className: "tracking-[1px]" },
@@ -41,7 +44,7 @@ export default async function VoucherPage({ searchParams }: { searchParams: Prom
       </div>
 
       <article
-        aria-label="Voucher de premio"
+        aria-label="Ticket de premio"
         className="ticket-in flex w-[320px] max-w-full flex-col items-center gap-2.5 bg-white px-5 py-[22px] font-sans text-black shadow-float print:w-[80mm] print:max-w-none print:shadow-none"
       >
         <Image
@@ -51,17 +54,38 @@ export default async function VoucherPage({ searchParams }: { searchParams: Prom
           height={110}
           className="size-[110px] object-contain grayscale contrast-[1.4]"
         />
-        <p className="text-[12px]">TEL {SOPORTE_TEL}</p>
+        <address className="-mt-1 flex flex-col items-center gap-0.5 text-center text-[11px] not-italic leading-[1.35]">
+          <span className="font-bold uppercase">{EMPRESA.ciudad}</span>
+          <span>{EMPRESA.direccion}</span>
+          <span>
+            Tel {EMPRESA.telefono} · Cel {EMPRESA.celular}
+          </span>
+          {EMPRESA.redes.map((r) => (
+            <span key={r.red}>
+              {r.red}: <b>{r.usuario}</b>
+            </span>
+          ))}
+        </address>
         <hr className="w-full border-0 border-t-2 border-dashed border-black" />
-        <h1 className="font-display text-[18px] font-black tracking-[2px]">VOUCHER DE PREMIO</h1>
-        <p className="text-[12px]">Ruleta · {giro.promocion}</p>
+        <h1 className="text-center font-display text-[17px] font-black leading-[1.2] tracking-[1.5px]">
+          TICKET DE PREMIO
+          <br />
+          CREDIN$TANTE
+        </h1>
+        <p className="-mt-1 font-display text-[16px] font-extrabold">Ruleta Regalona</p>
+        <p className="-mt-2 text-[11px]">{giro.promocion}</p>
 
         <div className="mt-1 w-full rounded-lg border-2 border-black p-2.5 text-center">
           <p className="text-[12px] font-bold tracking-[1px]">{esObjeto ? "PREMIO GANADO" : "MONTO GANADO"}</p>
           {esObjeto ? (
             <p className="py-2 font-display text-[30px] font-black leading-[1.1] [overflow-wrap:anywhere]">{giro.premio}</p>
           ) : (
-            <p className="font-display text-[52px] font-black leading-[1.05]">{formatMonto(giro.monto ?? 0)}</p>
+            <>
+              <p className={`font-display font-black leading-[1.05] ${(giro.monto ?? 0) >= 10000 ? "text-[40px]" : "text-[48px]"}`}>
+                {formatMonto(giro.monto ?? 0)}
+              </p>
+              <p className="mt-0.5 text-[12px] font-semibold leading-[1.3]">{montoEnLetras(giro.monto ?? 0)}</p>
+            </>
           )}
         </div>
 

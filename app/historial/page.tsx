@@ -48,7 +48,9 @@ export default async function HistorialPage({ searchParams }: { searchParams: Pr
         {tarjetas.map((r) => (
           <div key={r.label} className="flex min-w-0 flex-col gap-0.5">
             <dt className="text-[12px] text-[#C9D6F2]">{r.label}</dt>
-            <dd className={`truncate font-display text-[24px] font-black leading-tight ${r.gold ? "text-[#FFD966]" : ""}`}>
+            <dd
+              className={`truncate font-display font-black leading-tight ${r.value.length > 6 ? "text-[18px]" : r.value.length > 5 ? "text-[21px]" : "text-[24px]"} ${r.gold ? "text-[#FFD966]" : ""}`}
+            >
               {r.value}
             </dd>
           </div>
@@ -75,17 +77,20 @@ export default async function HistorialPage({ searchParams }: { searchParams: Pr
                   aria-hidden="true"
                   className={`flex size-10 shrink-0 items-center justify-center rounded-full font-display text-[16px] font-black ${coinTone(g)}`}
                 >
-                  {g.tipo === "OBJETO" ? <Gift size={18} strokeWidth={2.4} /> : "$"}
+                  {g.tipo === "OBJETO" ? <Gift size={18} strokeWidth={2.4} /> : <span className="text-[13px]">C$</span>}
                 </span>
                 <div className="flex min-w-0 grow flex-col gap-px">
-                  <p className="truncate text-[15px] font-semibold text-ink">{g.cliente}</p>
+                  <p className="text-[15px] font-semibold leading-tight text-ink [overflow-wrap:anywhere]">{g.cliente}</p>
                   <p className="text-[12px] text-ink-soft">
                     {periodo === "hoy" ? hora(g.fecha) : diaHora(g.fecha)} ·{" "}
                     <span className="whitespace-nowrap">Código {g.codigo}</span>
                   </p>
+                  {g.zona && <p className="text-[12px] text-ink-soft">{g.zona}</p>}
                 </div>
-                <div className="flex shrink-0 flex-col items-end gap-1">
-                  <p className="max-w-[120px] truncate font-display text-[18px] font-black leading-none text-brand-blue">
+                <div className="flex max-w-[38%] shrink-0 flex-col items-end gap-1">
+                  <p
+                    className={`text-right font-display font-black leading-tight text-brand-blue [overflow-wrap:anywhere] ${g.tipo === "OBJETO" ? "text-[15px]" : "text-[18px]"}`}
+                  >
                     {textoPremio(g)}
                   </p>
                   <Pill tone="greenLight" className="px-2 py-0.5 text-[11px]">
