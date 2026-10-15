@@ -16,7 +16,7 @@ export default function LoginPage() {
           className="size-[190px] object-contain"
         />
         <h1 className="mt-3.5 text-center font-display text-[30px] font-black text-brand-blue">¡Hola, promotor!</h1>
-        <p className="mt-1.5 text-center text-[15px] text-ink-soft">Ingresá para llevar premios a tus clientes</p>
+        <p className="mt-1.5 text-center text-[15px] text-ink-soft">¡Bienvenido a la ruleta regalona de credinstante! La suerte está de tu lado</p>
 
         <LoginForm />
 

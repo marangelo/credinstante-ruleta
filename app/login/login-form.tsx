@@ -61,12 +61,6 @@ export function LoginForm() {
             className={inputCls}
           />
         </div>
-        <a
-          href="#"
-          className="-my-2 flex min-h-11 items-center self-end text-[14px] font-semibold text-green-dark underline-offset-2 hover:text-brand-blue hover:underline"
-        >
-          ¿Olvidaste tu contraseña?
-        </a>
       </div>
 
       <p
